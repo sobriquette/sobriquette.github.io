@@ -14,6 +14,7 @@ var cache = require('gulp-cache');
 var del = require('del');
 var runSequence = require('run-sequence');
 var pkg = require('./package.json');
+var cssMinifyLocation = ['css/*.css', '!css/*.min.css'];
 
 // Set the banner content
 var banner = ['/*!\n',
@@ -54,7 +55,7 @@ gulp.task('images', function() {
 
 // Minify compiled CSS
 gulp.task('minify-css', ['sass'], function() {
-    return gulp.src('css/grayscale.css')
+    return gulp.src(cssMinifyLocation)
         .pipe(cleanCSS({ compatibility: 'ie8' }))
         .pipe(rename({ suffix: '.min' }))
         .pipe(gulp.dest('css'))
@@ -157,7 +158,7 @@ gulp.task('build', function (callback) {
 // Dev task with browserSync
 gulp.task('dev', ['browserSync', 'sass', 'useref'], function() {
     gulp.watch('sass/**/*.scss', ['sass']);
-    gulp.watch('css/*.css', ['minify-css']);
+    gulp.watch(cssMinifyLocation, ['minify-css']);
     gulp.watch('js/*.js', ['minify-js']);
     // Reloads the browser whenever HTML or JS files change
     gulp.watch('*.html', browserSync.reload);

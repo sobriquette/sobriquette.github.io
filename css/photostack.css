@@ -11,9 +11,9 @@
 
 .photostack {
 	background: #ddd;
+	overflow: hidden;
 	position: relative;
 	text-align: center;
-	overflow: hidden;
 }
 
 .js .photostack {
@@ -28,56 +28,62 @@
 
 /* The size of this wrapper can be smaller if the items should not be scattered across the whole container */ 
 .photostack > div {
-	width: 100%;
 	height: 100%;
 	margin: 0 auto;
+	width: 100%;
 }
 
 .photostack figure {
-	width: 320px;
-	height: 360px;
-	position: relative;
-	display: inline-block;
 	background: #fff;
-	padding: 40px;
-	text-align: center;
+	display: inline-block;
+	height: 360px;
 	margin: 5px;
+	padding: 40px;
+	position: relative;
+	text-align: center;
+	width: 320px;
 }
 
 .js .photostack figure {
-	position: absolute;
 	display: block;
 	margin: 0;
+	position: absolute;
 }
 
 .photostack figcaption h2 {
-	margin: 20px 0 0 0;
 	color: #a7a0a2;
 	font-size: 16px;
+	margin: 20px 0 0 0;
 }
 
 .photostack-img {
-	outline: none;
-	display: block;
-	width: 240px;
-	height: 240px;
 	background: #f9f9f9;
+	display: block;
+	height: 240px;
+	outline: none;
+	width: 240px;
+
+}
+
+img {
+	height: 240px;
+	width: 240px;
 }
 
 .photostack-back {
-	display: none;
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
 	background: #fff;
-	font-family: "Give You Glory", cursive;
 	color: #a7a0a2;
-	padding: 50px 40px;
-	text-align: left;
+	display: none;
+	font-family: "Give You Glory", cursive;
 	font-size: 22px;
+	height: 100%;
+	left: 0;
 	line-height: 1.25;
+	padding: 50px 40px;
+	position: absolute;
+	text-align: left;
+	top: 0;
+	width: 100%;
 	z-index: 1;
 }
 
@@ -91,14 +97,14 @@
 
 /* Navigation dots */
 .photostack nav {
-	position: absolute;
-	width: 100%;
-	bottom: 30px;
-	z-index: 90;
-	text-align: center;
-	left: 0;
 	-webkit-transition: opacity 0.3s;
 	transition: opacity 0.3s;
+	bottom: 30px;
+	left: 0;
+	position: absolute;
+	text-align: center;
+	width: 100%;
+	z-index: 90;
 }
 
 .photostack-start nav {
@@ -106,19 +112,19 @@
 }
  
 .photostack nav span {
-	position: relative;
-	display: inline-block;
-	margin: 0 5px;
-	width: 30px;
-	height: 30px;
-	cursor: pointer;
-	background: #aaa;
-	border-radius: 50%;
-	text-align: center;
+	-webkit-transform: scale(0.48);
 	-webkit-transition: -webkit-transform 0.6s ease-in-out, background 0.3s;
 	transition: transform 0.6s ease-in-out, background 0.3s;
-	-webkit-transform: scale(0.48);
+	background: #aaa;
+	border-radius: 50%;
+	cursor: pointer;
+	display: inline-block;
+	height: 30px;
+	margin: 0 5px;
+	position: relative;
+	text-align: center;
 	transform: scale(0.48);
+	width: 30px;
 }
 
 .photostack nav span:last-child {
@@ -126,31 +132,31 @@
 }
 
 .photostack nav span::after {
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-backface-visibility: hidden;
+	-webkit-font-smoothing: antialiased;
+	-webkit-transition: opacity 0.3s;
+	backface-visibility: hidden;
+	color: #fff;
 	content: "\e600";
+	display: inline-block;
 	font-family: 'icons';
 	font-size: 80%;
-	speak: none;
-	display: inline-block;
-	vertical-align: top;
 	font-style: normal;
-	font-weight: normal;
 	font-variant: normal;
-	text-transform: none;
+	font-weight: normal;
 	line-height: 30px;
-	color: #fff;
 	opacity: 0;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-transition: opacity 0.3s;
+	speak: none;
+	text-transform: none;
 	transition: opacity 0.3s;
-	-webkit-backface-visibility: hidden;
-	backface-visibility: hidden;
+	vertical-align: top;
 }
 
 .photostack nav span.current {
-	background: #888;
 	-webkit-transform: scale(1);
 	transform: scale(1);
+	background: #888;
 }
 
 .photostack nav span.current.flip {
@@ -160,25 +166,25 @@
 }
 
 .photostack nav span.flippable::after {
-	opacity: 1;
 	-webkit-transition-delay: 0.4s;
 	transition-delay: 0.4s;
+	opacity: 1;
 }
 
 /* Overlays */
 
 /* Initial overlay on photostack container */
 .js .photostack::before {
-	content: '';
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	background: rgba(0,0,0,0.5);
-	top: 0;
-	left: 0;
-	z-index: 100;
 	-webkit-transition: opacity 0.3s, visibility 0s 0.3s;
 	transition: opacity 0.3s, visibility 0s 0.3s;
+	background: rgba(0,0,0,0.5);
+	content: '';
+	height: 100%;
+	left: 0;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	z-index: 100;
 }
 
 .js .photostack-start::before {
@@ -188,21 +194,21 @@
 
 /* Button on photostack container */
 .js .photostack::after {
-	content: 'View Gallery';
-	font-weight: 400;
-	position: absolute;
-	border: 3px solid #fff;
-	text-align: center;
-	white-space: nowrap;
-	left: 50%;
-	top: 50%;
 	-webkit-transform: translateY(-50%) translateX(-50%);
 	transform: translateY(-50%) translateX(-50%);
-	padding: 10px 20px;
+	border: 3px solid #fff;
 	color: #fff;
-	text-transform: uppercase;
-	letter-spacing: 1px;
+	content: 'View Gallery';
 	cursor: pointer;
+	font-weight: 400;
+	left: 50%;
+	letter-spacing: 1px;
+	padding: 10px 20px;
+	position: absolute;
+	text-align: center;
+	text-transform: uppercase;
+	top: 50%;
+	white-space: nowrap;
 	z-index: 101;
 }
 
@@ -221,15 +227,15 @@
 
 /* Overlay on figure */
 .photostack figure::after {
-	content: '';
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
-	visibility: visible;
-	opacity: 1;
 	background: rgba(0,0,0,0.05);
+	content: '';
+	height: 100%;
+	left: 0;
+	opacity: 1;
+	position: absolute;
+	top: 0;
+	visibility: visible;
+	width: 100%;
 	-webkit-transition: opacity 0.6s;
 	transition: opacity 0.6s;
 }
