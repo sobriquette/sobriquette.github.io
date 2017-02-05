@@ -159,6 +159,13 @@ a {
     }
 }
 
+.avatar {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    margin-bottom: 30px;
+}
+
 .btn-circle {
     width: 70px;
     height: 70px;
@@ -260,7 +267,7 @@ a {
 
 @media(min-width:767px) {
     .content-section {
-        padding-top: 250px;
+        padding-top: 200px;
     }
 
     .experience-section,
@@ -318,18 +325,17 @@ a {
 }
 
 ul.banner-social-buttons {
-    margin-top: 0;
+    display: inline-block;
+    margin: 5px auto 0;
+
     @media(max-width:1199px) {
         margin-top: 15px;
     }
+
     @media(max-width:767px) {
         li {
-            display: block;
-            margin-bottom: 20px;
-            padding: 0;
-            &:last-child {
-                margin-bottom: 0;
-            }
+            float: left;
+            margin: 0 10px 20px;
         }
     }
 }

@@ -15,6 +15,7 @@ var del = require('del');
 var runSequence = require('run-sequence');
 var pkg = require('./package.json');
 var cssMinifyLocation = ['css/*.css', '!css/*.min.css'];
+var jsMinifyLocation = ['js/*.js', '!js/*.min.js'];
 
 // Set the banner content
 var banner = ['/*!\n',
@@ -29,7 +30,7 @@ var banner = ['/*!\n',
 gulp.task('sass', function() {
     return gulp.src('sass/**/*.scss')
         .pipe(sass().on('error', sass.logError))
-        .pipe(header(banner, { pkg: pkg }))
+        .pipe(gulpIf('grayscale.scss', header(banner, { pkg: pkg })))
         .pipe(gulp.dest('css'))
         .pipe(browserSync.reload({
             stream: true
@@ -53,6 +54,12 @@ gulp.task('images', function() {
         .pipe(gulp.dest('dist/img'))
 });
 
+gulp.task('assets', function() {
+    return gulp.src('img/*.{ico,pdf}')
+        // for favicon and documents
+        .pipe(gulp.dest('dist/img'))
+});
+
 // Minify compiled CSS
 gulp.task('minify-css', ['sass'], function() {
     return gulp.src(cssMinifyLocation)
@@ -66,9 +73,9 @@ gulp.task('minify-css', ['sass'], function() {
 
 // Minify JS
 gulp.task('minify-js', function() {
-    return gulp.src('js/grayscale.js')
+    return gulp.src(jsMinifyLocation)
         .pipe(uglify())
-        .pipe(header(banner, { pkg: pkg }))
+        .pipe(gulpIf('grayscale.js', header(banner, { pkg: pkg })))
         .pipe(rename({ suffix: '.min' }))
         .pipe(gulp.dest('js'))
         .pipe(browserSync.reload({
@@ -80,10 +87,6 @@ gulp.task('minify-js', function() {
 gulp.task('useref', function() {
     return gulp.src('*.html')
         .pipe(useref())
-        // Minifies only if a JavaScript file
-        .pipe(gulpIf('*.js', uglify()))
-        // Minifies only if it's a CSS file
-        .pipe(gulpIf('*.css', cleanCSS({ compatibility: 'ie8' })))
         .pipe(gulp.dest('dist'))
 });
 
@@ -149,7 +152,7 @@ gulp.task('build', function (callback) {
     runSequence(
         'clean:dist',
         'sass',
-        ['images', 'useref', 'fonts', 'copy', 'vendor'], 
+        ['images', 'assets', 'useref', 'fonts', 'copy', 'vendor'], 
         callback
     )
     console.log('Building project');
