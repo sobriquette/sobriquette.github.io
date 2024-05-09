@@ -17,6 +17,15 @@
       p, li {
         font-size: 1.2em;
       }
+      summary {
+        font-size: 1.2em;
+        font-weight: bold;
+      }
+      .codeblock {
+        max-width: 80ch;
+        padding: 1em;
+        overflow-wrap: break-word;
+      }
     </style>
   </head>
   <body>
@@ -26,12 +35,190 @@
           <p>I've never actually been to a tech conference; I'm pretty introverted and making small talk with a bunch of strangers in a crowded room takes a lot out of me. I've had a growing interest in the world of cyber security over the past several years, but never engaged deeply with any of the disciplines. The most I was involved with "security" (which was really more privacy-focused) at work was bringing my teams' applications and databases up-to-code w.r.t. data compliance and privacy regulations like GDPR.</p>
           <p>BSidesSF seemed like a great introduction into the different disciplines of "cyber security" and an opportunity for me to potentially discover which area I may be interested in exploring for a next step in my career.</p>
           <p>I actually skipped all the talks because 1&#41; they were always full and 2&#41; I thought going to the hacking villages and doing the CTF challenges would be a better hands-on, learning experience.</p>
+          <p>While you can find all the challenges and their respective solutions in the <a href="https://github.com/BSidesSF/ctf-2024-release/tree/main">BSides CTF 2024 github repo</a>, I'll be walking through my process for some of the problems I thought were interesting and fun to solve below. This was my first time doing a CTF, so I was going in totally blind with no expectations on what kinds of skills the challenges could require.</p>
         </section>
         <hr>
         <section>
-          <h2>CTF write-ups</h2>
-          <p>While you can find all the challenges from the competition in the <a href="https://github.com/BSidesSF/ctf-2024-release/tree/main">BSides CTF 2024 github repo</a>, I'll be walking through my process for some of the problems I thought were interesting and fun to solve below. This was my first time doing a CTF, so I was going in totally blind with no expectations on what the challenges may be like.</p>
-          <h3></h3>
+          <h2>color-picker challenge</h2>
+          <p><small>(Click on the bullet to expand the details.)</small></p>
+          <details>
+            <summary>Challenge overview</summary>
+            <p>This was a web challenge with a color-picker app running on the CTF server. You were provided a URL and the hint, "I wonder what color the flag is?".</p>
+            <p>When you click on the link, you land on a simple HTML page with nothing visible besides a dropdown with the CTA "Pick a shade" (homepage HTML <a href="https://github.com/BSidesSF/ctf-2024-release/blob/main/color-picker/challenge/templates/home.html">here</a>). The options were "umbrella" colors like "pink", "gray", and "blue"; selecting one of these options takes you to a results page tabularizing the different shades of the main color, their HTML names, and associated hex codes.</p>
+          </details>
+          <details>
+            <summary>Initial thoughts / brute force</summary>
+            <p>My first thought was maybe this was one of those "hacker-y" problems I've seen and heard about, where you have to ssh into the machine to find the flag. But my teammate told me that the challenge would be labeled a <strong>PWN</strong> challenge, and not <strong>web</strong>. Okay cool, one possibility eliminated.</p>
+            <p>So back to the hint: it sounded like the flag wouldn't be something you'd find by choosing any of the color options in the dropdown because that'd be too simple. Nevertheless, I clicked through all the options and looked through the document and event changes to see if maybe the flag was hidden in the HTML or something -- you never know. As suspected, they were not.</p>
+            <p>I also noticed that the dropdown element was wrapped in a <code>form</code> element with an <code>action</code> attribute that calls a path <code>/shade</code> upon clicking the submit button, presumably an API endpoint. This means the data, i.e. the shades of colors, are a resource we're accessing via that endpoint. Maybe the flag is on the server? I tried hitting the server with some wild guesses at possible endpoints, like <code>/flag</code>, <code>/ctf</code>, <code>/src</code>...etc. I've been able to find source code, directories, and even trigger requests this way in the past, so figured I'd try it here. I didn't spend too much time on this though because they were wild guesses after all, and my hunch was that I missed a detail on the results page.</p>
+          </details>
+          <details>
+            <summary>An interesting request URL</summary>
+            <p>My next thought was to play with the option values themselves, and submitting them to see if I could break something; values like <code>flag</code> or <code>CTF</code>. Submitting the value <code>CTF</code> was interesting because it took me to a results page with a table of <i>all</i> possibles the shades of colors you could get.</p>
+            <p>And the <strong>most</strong> interesting part -- which I should've thought to check earlier -- was the URL of the results page. I didn't think to check the URL of the results page earlier because I was using Safari, which hides everything in the address bar besides the domain name. I thought the URL wasn't changing as a result, <i>but it was</i>.</p>
+            <p>The URL of this <i>"show all results"</i> page I found was: <code>https://color-picker-5861f5ad.challenges.bsidessf.net/color?range_start=A1&range_end=C142</code>.</p>
+            <p>A range of values? How interesting. Three columns: A, B, C. Okay, that matches the number of columns in the table. That means the colors are all mapped to some value in some table, somewhere. I just need to find the table.</p>
+            <p>So what if I put in a wrong value in the range? Like...<code>A0</code>.</p>
+            <p>Bam. I broke it, perfect. This was the error shown on the page:</p>
+            <div class="codeblock">
+              <code>
+                Traceback (most recent call last): File "/app/server.py", line 90, in color response.raise_for_status() File "/usr/local/lib/python3.9/dist-packages/requests/models.py", line 1021, in raise_for_status raise HTTPError(http_error_msg, response=self) requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://sheets.googleapis.com/v4/spreadsheets/18hFC6DvTZ-NtbYby7Sej0f8t8-6n0_GL7Uf25acuRk8/values/A0:C142?access_token=ya29.c.c0AY_VpZgVA9gYZdIwElOZ3JllcqgOZ90CiSW4Yhmo5mrXBXjdzby1l2Cn7QrlFtaWA_EfJRTS1ikcXajrVKHWgGJ2cLtAcyBvGCMvQPlJFcyma5n8BhZrbuUKEiSBcuZE6-QZR7pEj-fX0C_XEmMn1BlHCgC9eZ_sSDvIykQr-PLSUaFKNBGljFuelkms3hTnjEJ4XFoBO7t_4KUG1AuMdm0eQ5VW4J1vbusk95yfrWfQPnU4ZoRIJUrAK4nA5f6PRX1dHSk9imVRCPkhCLEhUcDdIFsipS7d4WcEFPBW4cV6Uao1NFOGBWDU6vfX2ZPlWDOsak1MMIx9BietAKK4mMo9cIlckNInEXvj2qzXH_hs5ARpO_ZnEcVVL385AJ3e_hWgwixXQMu5s_po2cM5M7bZZt8528dnsMp8tV6vxu4aFUcdumrqm0BcFefxw_uMe5FWy2zlRR0knnJgcO2xflg0p5zzORqi_SMa0wa5Mtmct2SBaj-3xzOvdBanBQ75Ia4n95v3skztag3h1f9txBswaS5FI6uv-7tgYoh4ueYJu4Xinb5B9ll4Iz5tq_rkWZRzWkq9uxyqBkwlzfBMjenR-zukkUk30Zfq4y580vUmwvbIe2pV2Js2b1cuW_rncfJbSpreyjxdnhqBSw-6shJjV7u1k86a8U1V8gk7y90IzhqxQS2f3jmoXauW296y_RkfzdYaBii9qt5neOsQz1IqMq6OrjyXlUpSep-lZFdVv5mZzd-xgUgUnraktyi0jYyYhvMRcxj5ljY2WeqlRrwW6yeiWBWwr0VMwfWOVIur8lv581BqjVJgypVIjMfZwYQ_BkYr_4VYhgQ65BzIFRUM0omb-VwsyypmR7f_v49U0jcBywBX5xggUXZJZzb099l8bpqRqtqg_YUsy04JtRS3oaOY6wR663e3-hpd0J802xBwooftfWnhfIx-Ujy0iRfua4IuV_d5SOS0Me3Xt02b_2sjYVRS4aVkg46ZSsaSmlf2xu63Y7h
+              </code>
+            </div>
+            <p>Exciting! Looking at the stacktrace, we can see that the app makes a call to the Google Sheets API and even includes the API access token in the URL for us.</p>
+            <p>To better understand the structure of the URL, I took a quick look at the Google Sheets API <a href="https://developers.google.com/sheets/api/guides/concepts">documentation</a>. The key things to note here are the location of <code>{spreadsheetId}</code> and the call to an endpoint <code>/values</code>. So now I know that my request generated an error because there is no such thing as an <code>A0</code> cell in Google Sheets.</p>
+          </details>
+          <details>
+            <summary>The solution</summary>
+            <p>I felt pretty good about the CTF flag being hidden somewhere in this spreadsheet, so my next step was to hit the spreadsheet directly. I wanted to know more about the spreadsheet itself, so I dropped <code>/values/A0:C142</code> so that I could get just the spreadsheet data:</p>
+            <div class="codeblock"><code>https://sheets.googleapis.com/v4/spreadsheets/18hFC6DvTZ-NtbYby7Sej0f8t8-6n0_GL7Uf25acuRk8?access_token=ya29.c.c0AY_VpZjGuj91YkrxRLCMeajF1n5hgPCuTJ1QgeOGBTAfdL7FfldACUF94_RwwjlAux3pjUlYaZmcQozohdlUiDNLVwk_AVoLIynGXrY5ewpynOWbLma0_zbv8IMYQ9vCEe6xm1gkSDyFjw6CEg6lbriEnnOJy21aou6V98l_M4WHA6KMixWetOilhdl-KLdEiqbX41HF1a1VyX3p6kAdUoNHgQf6jJXJVqUXhALMSWrPFDkvMZDYR93z8LxmGFDlJyp5AVZAH9cPkUFbVldiGfFy9YKXlSok4Sy3UL-HMuj464WBQvjG4H1Ta_JiYiH0elzxocm0H0qo09pl_u3Yb7s4tbszKkt3KHhBlp10t-fQUSfYpJ-aHtta7AN387KMIacFQWZdQp9p3Z0bsBrsZnuntdhhFbFV2n40qgMa37enOwBF8mmXJZivqmFWahzwzn25Ms7hp1Jpx3Yo8vl7BeBOxs448pZYUS4iM8y3hl3S2qm8Xnyh0J60vj_SdI2ay2fIOuFvvu18RXx30usvYslbunnZq-2wi9jhq3zqxJOzhdf-YtqYUnsSjpsf5bxjWb7bh7z3Uvq8re4UyOmRVO_asBw648ZYuyQsQd5X-kfsfg0jwbQmZx7yh_J0zr0jO2keisSBj9z7v3sXyuuSMjcSqXZ0nxOQ88g0-v6-OyQwh0i8Y9I84X5vimBjbU3Y1MIe9Sj51OdirhQv63frz-hphX9Sd0aYj_cUV5FWIO8jvtgJlyfWZt4xYwu7bvapgFc5M2V-IyiehZXWInuVxOaw8uqji_lUoiV9f3yWec2sgJUzpdwgWyv1e5xQ2mgv1OF5edR7BjbxvQ_-X2vxVQf6J8ywQ31vM7oU2djrr8df7mucJ6pJWrd80kUf16IaBMrMeuQyYd8QUlW30o6ko0Q9iXupv3aRioFprrwVOdgVZVMhcYcMJcUvt5gJ5ZkWn6rYvozyqMoItXMll6icBJFhY9jwoZyYscMO03ekc0WlJVBoqd666Ff</code></div>
+            And this is the response I got:
+            <div class="codeblock">
+              <pre>
+                <code>
+                  {
+                    "spreadsheetId": "18hFC6DvTZ-NtbYby7Sej0f8t8-6n0_GL7Uf25acuRk8",
+                    "properties": {
+                      "title": "Color Sheet",
+                      "locale": "en_US",
+                      "autoRecalc": "ON_CHANGE",
+                      "timeZone": "America/Los_Angeles",
+                      "defaultFormat": {
+                        "backgroundColor": {
+                          "red": 1,
+                          "green": 1,
+                          "blue": 1
+                        },
+                        "padding": {
+                          "top": 2,
+                          "right": 3,
+                          "bottom": 2,
+                          "left": 3
+                        },
+                        "verticalAlignment": "BOTTOM",
+                        "wrapStrategy": "OVERFLOW_CELL",
+                        "textFormat": {
+                          "foregroundColor": {},
+                          "fontFamily": "arial,sans,sans-serif",
+                          "fontSize": 10,
+                          "bold": false,
+                          "italic": false,
+                          "strikethrough": false,
+                          "underline": false,
+                          "foregroundColorStyle": {
+                            "rgbColor": {}
+                          }
+                        },
+                        "backgroundColorStyle": {
+                          "rgbColor": {
+                            "red": 1,
+                            "green": 1,
+                            "blue": 1
+                          }
+                        }
+                      },
+                      "spreadsheetTheme": {
+                        "primaryFontFamily": "Arial",
+                        "themeColors": [
+                          {
+                            "colorType": "TEXT",
+                            "color": {
+                              "rgbColor": {}
+                            }
+                          },
+                          {
+                            "colorType": "BACKGROUND",
+                            "color": {
+                              "rgbColor": {
+                                "red": 1,
+                                "green": 1,
+                                "blue": 1
+                              }
+                            }
+                          },
+                          {
+                            "colorType": "ACCENT1",
+                            "color": {
+                              "rgbColor": {
+                                "red": 0.25882354,
+                                "green": 0.52156866,
+                                "blue": 0.95686275
+                              }
+                            }
+                          },
+                          {
+                            "colorType": "ACCENT2",
+                            "color": {
+                              "rgbColor": {
+                                "red": 0.91764706,
+                                "green": 0.2627451,
+                                "blue": 0.20784314
+                              }
+                            }
+                          },
+                          ...
+                        ]
+                      }
+                    },
+                    "sheets": [
+                      {
+                        "properties": {
+                          "sheetId": 0,
+                          "title": "Sheet1",
+                          "index": 0,
+                          "sheetType": "GRID",
+                          "gridProperties": {
+                            "rowCount": 1000,
+                            "columnCount": 26
+                          }
+                        }
+                      },
+                      {
+                        "properties": {
+                          "sheetId": 430183158,
+                          "title": "Sheet2",
+                          "index": 1,
+                          "sheetType": "GRID",
+                          "gridProperties": {
+                            "rowCount": 1000,
+                            "columnCount": 26
+                          }
+                        }
+                      }
+                    ],
+                    "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/18hFC6DvTZ-NtbYby7Sej0f8t8-6n0_GL7Uf25acuRk8/edit"
+                  }
+                </code>
+              </pre>
+            </div>
+            <p>Properties, formatting, blah blah blah...oh hello, what's this? An array containing data about all the sheets in the spreadsheet? Awesome. So there are <strong>two</strong> sheets in this spreadsheet. The colors are coming from <code>Sheet1</code>, so the flag -- <strong>*fingers crossed*</strong> -- must be in <code>Sheet2</code>.</p>
+            <p>All that was left to do was modify the URL to this:</p>
+            <div class="codeblock">
+              <code>
+                https://sheets.googleapis.com/v4/spreadsheets/18hFC6DvTZ-NtbYby7Sej0f8t8-6n0_GL7Uf25acuRk8/values/Sheet2!A1:Z200?access_token={...}
+              </code>
+            </div>
+            <p>Drum roll please...</p>
+            <p>Tada!</p>
+            <div class="codeblock">
+              <pre>
+                <code>
+                  {
+                    "range": "Sheet2!A1:Z200",
+                    "majorDimension": "ROWS",
+                    "values": [
+                      [
+                        "Flag",
+                        "CTF{acc355-t0k3n5}"
+                      ]
+                    ]
+                  }
+                </code>
+              </pre>
+            </div>
+            <p>We've found our flag! The answer is: <code>CTF{acc355-t0k3n5}</code>. Submitted this to the CTF server, had my answer verified, and earned a couple hundred points for the team &#x1f44d;.</p>
+            <p>Super fun problem to work through. I felt like a lil' web detective with my magnifying glass, following the breadcrumbs.</p>
+          </details>
         </section>
     </main>
   </body>
