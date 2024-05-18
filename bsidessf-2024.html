@@ -7,35 +7,17 @@
     <meta name="keywords" content="software engineer, melody lin, professional, personal website, security engineer, tech conferences, bssidessf" />
     <meta name="author" content="Melody Lin">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="/avatar.jpg">
-    <style>
-      body {
-        width: 50em;
-        margin: 0 auto;
-        font-family: Piazzolla, Didot, serif;
-      }
-      p, li {
-        font-size: 1.2em;
-      }
-      summary {
-        font-size: 1.2em;
-        font-weight: bold;
-      }
-      .codeblock {
-        max-width: 80ch;
-        padding: 1em;
-        overflow-wrap: break-word;
-      }
-    </style>
+    <link rel="stylesheet" href="index.css">
   </head>
   <body>
+    <nav><a href="./index.html">&lt; Back to home</a></nav>
     <main>
         <section>
           <h1>My first security con: BSidesSF 2024</h1>
-          <p>I've never actually been to a tech conference; I'm pretty introverted and making small talk with a bunch of strangers in a crowded room takes a lot out of me. I've had a growing interest in the world of cyber security over the past several years, but never engaged deeply with any of the disciplines. The most I was involved with "security" (which was really more privacy-focused) at work was bringing my teams' applications and databases up-to-code w.r.t. data compliance and privacy regulations like GDPR.</p>
-          <p>BSidesSF seemed like a great introduction into the different disciplines of "cyber security" and an opportunity for me to potentially discover which area I may be interested in exploring for a next step in my career.</p>
-          <p>I actually skipped all the talks because 1&#41; they were always full and 2&#41; I thought going to the hacking villages and doing the CTF challenges would be a better hands-on, learning experience.</p>
-          <p>While you can find all the challenges and their respective solutions in the <a href="https://github.com/BSidesSF/ctf-2024-release/tree/main">BSides CTF 2024 github repo</a>, I'll be walking through my process for some of the problems I thought were interesting and fun to solve below. This was my first time doing a CTF, so I was going in totally blind with no expectations on what kinds of skills the challenges could require.</p>
+          <p>I've never actually been to a tech conference; I'm pretty introverted and making small talk with a bunch of strangers in a crowded room can be overwhelming. I've had a growing interest in the world of cyber security over the past several years, but it's mostly just been curiosity than exploration. The most I was involved with "security" (which was really more privacy-focused) at work was bringing my teams' applications and databases up-to-code w.r.t. data compliance and privacy regulations like GDPR.</p>
+          <p>BSidesSF seemed like a great introduction into the different disciplines of security and an opportunity for me to discover which areas I could <strong>potentially</strong> be interested in exploring as a next step in my career.</p>
+          <p>I ended up skipping all the talks because 1&#41; they were always full and 2&#41; I thought going to the hacking villages and doing the CTF challenges would be a better hands-on, learning experience.</p>
+          <p>While you can find all the challenges and their respective solutions in the <a href="https://github.com/BSidesSF/ctf-2024-release/tree/main">BSides CTF 2024 GitHub repo</a>, I'll be walking through my process for some of the problems I thought were extra fun to solve. This was my first time doing a CTF and joined with virtually an empty toolbet, but walked away with good learnings and new skills!</p>
         </section>
         <hr>
         <section>
@@ -44,7 +26,35 @@
           <details>
             <summary>Challenge overview</summary>
             <p>This was a web challenge with a color-picker app running on the CTF server. You were provided a URL and the hint, "I wonder what color the flag is?".</p>
-            <p>When you click on the link, you land on a simple HTML page with nothing visible besides a dropdown with the CTA "Pick a shade" (homepage HTML <a href="https://github.com/BSidesSF/ctf-2024-release/blob/main/color-picker/challenge/templates/home.html">here</a>). The options were "umbrella" colors like "pink", "gray", and "blue"; selecting one of these options takes you to a results page tabularizing the different shades of the main color, their HTML names, and associated hex codes.</p>
+            <p>When you click on the link, you land on a simple HTML page with nothing visible besides a dropdown with the CTA "Pick a shade" (homepage HTML <a href="https://github.com/BSidesSF/ctf-2024-release/blob/main/color-picker/challenge/templates/home.html">here</a>). The options were colors like <i style="color:pink">pink</i>, <i style="color:gray">gray</i>, and <i style="color:blue">blue</i>. After selecting an option and clicking the submit button, a results page loads with a table of the different shades associated with the color chosen.</p>
+            <p>For example, selecting "pink" would yield a table that looked something like this:</p>
+            <table>
+              <tr>
+                <th>Name</th>
+                <th>Hex code</th>
+                <th>Color</th>
+              </tr>
+              <tr>
+                <td>Pink</td>
+                <td>#FFC0CB</td>
+                <td style="background-color:#FFC0CB;"></td>
+              </tr>
+              <tr>
+                <td>Light pink</td>
+                <td>#FFB6C1</td>
+                <td style="background-color:#FFB6C1;"></td>
+              </tr>
+              <tr>
+                <td>Pastel pink</td>
+                <td>#F8C8DC</td>
+                <td style="background-color:#F8C8DC;"></td>
+              </tr>
+              <tr>
+                <td>Pink orange</td>
+                <td>#F89880</td>
+                <td style="background-color:#F89880;"></td>
+              </tr>
+            </table>
           </details>
           <details>
             <summary>Initial thoughts / brute force</summary>
@@ -56,7 +66,10 @@
             <summary>An interesting request URL</summary>
             <p>My next thought was to play with the option values themselves, and submitting them to see if I could break something; values like <code>flag</code> or <code>CTF</code>. Submitting the value <code>CTF</code> was interesting because it took me to a results page with a table of <i>all</i> possibles the shades of colors you could get.</p>
             <p>And the <strong>most</strong> interesting part -- which I should've thought to check earlier -- was the URL of the results page. I didn't think to check the URL of the results page earlier because I was using Safari, which hides everything in the address bar besides the domain name. I thought the URL wasn't changing as a result, <i>but it was</i>.</p>
-            <p>The URL of this <i>"show all results"</i> page I found was: <code>https://color-picker-5861f5ad.challenges.bsidessf.net/color?range_start=A1&range_end=C142</code>.</p>
+            <p>The URL of this <i>"show all results"</i> page I found was:</p>
+            <div class="codeblock">
+              <code>https://color-picker-5861f5ad.challenges.bsidessf.net/color?range_start=A1&range_end=C142</code>
+            </div>
             <p>A range of values? How interesting. Three columns: A, B, C. Okay, that matches the number of columns in the table. That means the colors are all mapped to some value in some table, somewhere. I just need to find the table.</p>
             <p>So what if I put in a wrong value in the range? Like...<code>A0</code>.</p>
             <p>Bam. I broke it, perfect. This was the error shown on the page:</p>
@@ -72,7 +85,7 @@
             <summary>The solution</summary>
             <p>I felt pretty good about the CTF flag being hidden somewhere in this spreadsheet, so my next step was to hit the spreadsheet directly. I wanted to know more about the spreadsheet itself, so I dropped <code>/values/A0:C142</code> so that I could get just the spreadsheet data:</p>
             <div class="codeblock"><code>https://sheets.googleapis.com/v4/spreadsheets/18hFC6DvTZ-NtbYby7Sej0f8t8-6n0_GL7Uf25acuRk8?access_token=ya29.c.c0AY_VpZjGuj91YkrxRLCMeajF1n5hgPCuTJ1QgeOGBTAfdL7FfldACUF94_RwwjlAux3pjUlYaZmcQozohdlUiDNLVwk_AVoLIynGXrY5ewpynOWbLma0_zbv8IMYQ9vCEe6xm1gkSDyFjw6CEg6lbriEnnOJy21aou6V98l_M4WHA6KMixWetOilhdl-KLdEiqbX41HF1a1VyX3p6kAdUoNHgQf6jJXJVqUXhALMSWrPFDkvMZDYR93z8LxmGFDlJyp5AVZAH9cPkUFbVldiGfFy9YKXlSok4Sy3UL-HMuj464WBQvjG4H1Ta_JiYiH0elzxocm0H0qo09pl_u3Yb7s4tbszKkt3KHhBlp10t-fQUSfYpJ-aHtta7AN387KMIacFQWZdQp9p3Z0bsBrsZnuntdhhFbFV2n40qgMa37enOwBF8mmXJZivqmFWahzwzn25Ms7hp1Jpx3Yo8vl7BeBOxs448pZYUS4iM8y3hl3S2qm8Xnyh0J60vj_SdI2ay2fIOuFvvu18RXx30usvYslbunnZq-2wi9jhq3zqxJOzhdf-YtqYUnsSjpsf5bxjWb7bh7z3Uvq8re4UyOmRVO_asBw648ZYuyQsQd5X-kfsfg0jwbQmZx7yh_J0zr0jO2keisSBj9z7v3sXyuuSMjcSqXZ0nxOQ88g0-v6-OyQwh0i8Y9I84X5vimBjbU3Y1MIe9Sj51OdirhQv63frz-hphX9Sd0aYj_cUV5FWIO8jvtgJlyfWZt4xYwu7bvapgFc5M2V-IyiehZXWInuVxOaw8uqji_lUoiV9f3yWec2sgJUzpdwgWyv1e5xQ2mgv1OF5edR7BjbxvQ_-X2vxVQf6J8ywQ31vM7oU2djrr8df7mucJ6pJWrd80kUf16IaBMrMeuQyYd8QUlW30o6ko0Q9iXupv3aRioFprrwVOdgVZVMhcYcMJcUvt5gJ5ZkWn6rYvozyqMoItXMll6icBJFhY9jwoZyYscMO03ekc0WlJVBoqd666Ff</code></div>
-            And this is the response I got:
+            <p>And this is the response I got:</p>
             <div class="codeblock">
               <pre>
                 <code>
@@ -186,7 +199,8 @@
                         }
                       }
                     ],
-                    "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/18hFC6DvTZ-NtbYby7Sej0f8t8-6n0_GL7Uf25acuRk8/edit"
+                    "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/
+                    18hFC6DvTZ-NtbYby7Sej0f8t8-6n0_GL7Uf25acuRk8/edit"
                   }
                 </code>
               </pre>
@@ -219,6 +233,182 @@
             <p>We've found our flag! The answer is: <code>CTF{acc355-t0k3n5}</code>. Submitted this to the CTF server, had my answer verified, and earned a couple hundred points for the team &#x1f44d;.</p>
             <p>Super fun problem to work through. I felt like a lil' web detective with my magnifying glass, following the breadcrumbs.</p>
           </details>
+        </section>
+        <hr>
+        <section>
+          <h2>missing characters challenge</h2>
+          <details>
+            <summary>Challenge overview</summary>
+            <p>This was a cryptography challenge. As a full-stack software engineer, a web challenge like <strong>color-picker</strong> was more in my wheelhouse. I have vague notions of how encryption methods like RSA, SHA256...etc. work, but have zero experience with cryptography otherwise.</p>
+            <p>The challenge was called <i>missing characters</i> and the hint was: "Can you read between the lines? Flag is the answer in the form <code>CTF{----_-------_---_-----}</code>".</p>
+            <p>You are provided a file called <a href="./bsidessf-2024/missing-characters/ciphertext.txt"><code>cipher.txt</code></a>, and that's it.</p>
+          </details>
+          <details>
+            <summary>Array properties and ChatGPT</summary>
+            <p>Firstly, the textfile is massive. I took a quick scan through it and this is what stood out to me:</p>
+            <ul>
+              <li>it's a 2D array</li>
+              <li>numbers are not sorted in each nested array</li>
+              <li>too many numbers in each array to tell if they have the same numbers</li>
+            </ul>
+            <p>My first instinct was that maybe each array represents one of the "missing characters". Based on the hint about the structure of the flag, there are 19 characters missing in total. I wrote a Python function to count the number of arrays and also print the length of each nested array:</p>
+            <img src="./bsidessf-2024/missing-characters/count_arrays.png" alt="count_arrays function">
+            <p>And my output looked something like this:</p>
+            <img src="./bsidessf-2024/missing-characters/count_arrays_output.png" alt="output of count_arrays fn">
+            <p>I found it interesting that all the arrays had the same length because that told me that I shouldn't be relying on the property differences between the nested arrays to find a pattern. I.e. If the arrays had been different lengths, my thinking would be that each array maybe computes to something different or one array holds the key to deciphering the next array...something of that sort.</p>
+            <p>(The number <strong>254</strong> tickled something in the back of my brain, but I didn't come back to it until way later. A shame, because if I had realized sooner the significance of it, I would've solved this challenge in 1/3 of the time).</p>
+            <p>So this is where I kind of got thrown off track. In my head, my goal had become to find 19 characters, not 27. If I had included all the characters in the full flag, starting with "CTF", I would have realized that there are 27 characters! Another <em>doh!</em> moment in looking back on this.</p>
+            <p>I wasn't quite sure where to go from here and started second-guessing my gut instinct that these arrays and/or their values represented the missing characters somehow. Also, what did <i>"read between the lines"</i> mean?</p>
+            <p>If there were 27 arrays and I only needed 19, maybe I actually <strong><em>did</em></strong> need to do some mathematical transformation with the numbers in the arrays to reduce them into something that would represent 19 missing characters. I grilled ChatGPT on whether 2D arrays have any significance in cryptography, what cryptographic methods produce 2D arrays, what keys you can generate with with 2D arrays...etc.</p>
+            <p>I even asked ChatGPT, <i>"What could an array of numbers with a length of 254 mean?"</i>. Apparently, it could represent signal data, image data, sensor readings, time series data...none of which seemed relevant to characters and would get me closer to revealing them.</p>
+            <p>I got stuck in a bit of a rabbit-hole and lost sight of the problem.</p>
+          </details>
+          <details>
+            <summary>It was just ASCII</summary>
+            <p><i>(Spoilers in the title!)</i> I looked back again at the output I got from my <code>count_arrays</code> function: 254 elements in each array. Frustrated, I asked my teammate this time, "Does this number have any significance to you?", and to which they responded, "I know that ASCII has 255 characters, but not 254". <i>OH</i>. What a face-plant, bang-my-head-on-the-desk sort of moment. How did it not occur to me that these could be the decimal values for ASCII characters sooner? How could I have forgotten that there are 255 characters in the extended ASCII codes?</p>
+            <p>If it was ASCII, then the largest number in the whole dataset should be <strong>255</strong>. I already knew there weren't zeroes or negative numbers. So a quick function to check will do:</p>
+            <img src="./bsidessf-2024/missing-characters/find_max.png" alt="find_max fn">
+            <p>And indeed, the largest value in the whole dataset was 255.</p>
+            <p>Now we were getting somewhere. I wanted to just print each array to see what the output looked like:</p>
+            <img src="./bsidessf-2024/missing-characters/convert_to_ascii.png" alt="convert_to_ascii fn">
+            <p>At first, I limited it to just letters of alphabet, hence the <code>if</code> condition that's commented out. That didn't produce a discernible flag, so I removed the condition and re-ran the script.</p>
+            <p>The output:</p>
+            <img src="./bsidessf-2024/missing-characters/convert_to_ascii_output.png" alt="output of convert_to_ascii">
+            <p>I thought that sorting the values first before converting them to ASCII was a stroke of brilliance and the flag would become immediately clear. But they all looked the same to me! What was missing? Was there actually even something missing at all?! I just wanted to solve this and move on.</p>
+            <p>I took a breath and looked again, but more closely this time, and <i>finally</i>, yes, there was a character missing in each array! <em><strong>C</strong></em> from the first array, <em><strong>T</strong></em> from the second, <em><strong>F</strong></em> from the third...ok yes this is the start of the flag. We got it.</p>
+          </details>
+          <details>
+            <summary>The solution</summary>
+            <p>Golly gee willikers did it take me <strong>way</strong> too long to <i>string</i> (pun intended) all the pieces together, but I knew what I had to do to finally capture this flag: a binary search.</p>
+            <img src="./bsidessf-2024/missing-characters/binary_search.png" alt="binary search fn">
+            <p>Lo and behold, the flag:</p>
+            <img src="./bsidessf-2024/missing-characters/missing_characters_solution.png" alt="ctf flag">
+          </details>
+        </section>
+        <hr>
+        <section>
+          <h2>sgai forensics challenge</h2>
+          <details>
+            <summary>Challenge overview</summary>
+            <p>This challenge was actually four challenges in one -- we were given one file, which had four flags hidden in it. The challenges had their respective number of points and were referred to as sgai-1, sgai-2, sgai-3, and sgai-4. You can view the challenge notes <a href="./bsidessf-2024/sgai/challenge/notes.txt">here</a> and view the file with the flags hidden <a href="./bsidessf-2024/sgai/challenge/sgai.sgi">here</a>.</p>
+          </details>
+          <details>
+            <summary>Initital approach</summary>
+            <p>By the time I got to this challenge, I had already solved a few other forensics challenges. I learned to use <code>file</code> to get information about the file type and other properties, <code>xxd</code> to create and analyze hexadecimal dumps from a file, run <code>strings</code> to extract printable text from binary files, and installed <code>binwalk</code> to search and extract any embedded files from a binary image.</p>
+            <p>The first thing I did was run <code>file</code>, which told me this:</p>
+            <div class="codeblock"><code>sgai/sgai.sgi: SGI image data, RLE, 3-D, 3072 x 3072, 4 channels</code></div>
+            <p>4 channels -- whatever that means -- in a file that is supposed to contain 4 flags? How interestingly convenient. I felt like I was onto something here.</p>
+            <p>Because I had <em><strong>so</strong></em> much success with <code>binwalk</code> in the other challenges, I ran that next. (What I should've done was actually first run <code>strings</code> and <code>xxd</code>, but more on that later).</p>
+            <p>The funny thing is, I got nothing. This was my result:</p>
+            <img src="./bsidessf-2024/sgai/attempts/sgai_binwalk_output.png" alt="binwalk output">
+            <p>As a newbie, this left me stumped. There was nothing embedded in here? I knew that binwalk isn't perfect and can give false positives, but <i>nothing</i>?</p>
+          </details>
+          <details>
+            <summary>Understanding the SGI file format</summary>
+            <p>Let's take a step back: what's an SGI file? I knew it was some sort of image file type, but how does it work? How does it compress -- or not -- data and what type of encoding does it use? I decided to dig in a little (but being careful not to rabbit-hole).</p>
+            <p><strong>SGI</strong> stands for <strong>Silicon Graphics Image</strong>, and is a raster graphics file format created by a high-performance computing manufacturer called (as you may have guessed) SGI. The founders developed the first VLSI ("very-large-scale integration") implementation of a geometry pipeline, which is the first stage in computer graphics systems and does the modeling and computations needed to display 3D images.</p>
+            <p>SGI files typically use RLE (run-length encoding) for data compression. It has a number of common file extensions that indicate which, and how many, channels are in the file. See the table below:</p>
+            <table>
+              <tr>
+                <th>File extension</th>
+                <th>Channels</th>
+              </tr>
+              <tr>
+                <td>.sgi or .rgb</td>
+                <td>3 color channels (RGB)</td>
+              </tr>
+              <tr>
+                <td>.rgba</td>
+                <td>3 color channels and alpha</td>
+              </tr>
+              <tr>
+                <td>.bw or .int</td>
+                <td>black and white</td>
+              </tr>
+              <tr>
+                <td>.inta</td>
+                <td>black and white and alpha</td>
+              </tr>
+            </table>
+            <p>(The <a href="https://en.wikipedia.org/wiki/Silicon_Graphics_Image">SGI Wiki page</a> also includes this information, among other helpful technical details I leveraged, e.g. headers and magic numbers).</p>
+            <p>Our <code>file</code> command revealed that there were 4 channels; I found this confusing because it made me wonder why the extension used was <code>.sgi</code> and not <code>.rgba</code>. Regardless, I continued with the assumption that here were 4 channels to work with.</p>
+            <p>Now that I understood that "channels" is referring to the RGBA color space it seemed sensible to me that what I had to do was to split the image file into each channel to find the hidden flag.</p>
+          </details>
+          <details>
+            <summary>Attempt 1: converting to PNG</summary>
+            <p>Because I wasn't able to extract any information from the SGI file directly with <code>binwalk</code>, I figured maybe converting it to a more commonly-used image file format like <code>PNG</code> might make a difference. I'd done a <code>.docx</code> to PDF conversion to solve one challenge and worked with PNG files in a couple other forensics challenges, so it seemed like a similar principle could apply here.</p>
+            <p>I got ChatGPT to write me a quick function to do the conversion for me:</p>
+            <img src="./bsidessf-2024/sgai/attempts/convert_sgi_fn.png" alt="convert sgi fn">
+            <p>The first time I ran this SGI-conversion script, I got a completely blank, empty PNG. Like, literally no data at all -- I ran <code>binwalk</code> and <code>xxd</code> and there was just nothing. Very bizarre, figured it might be a fluke (and also because I have no experience using the Pillow library), so I ran it again.</p>
+            <p>This time, I got a PNG that looks exactly like the SGI file.</p>
+            <p>I first ran <code>strings</code> on it, for which the output is <a href="./bsidessf-2024/sgai/attempts/png_strings_output.txt">here</a>.</p>
+            <p>The header chunk <code>IHDR</code> told me what was already obvious: that this was a PNG file. Sometimes there's extra stuff beteween the header chunk and the <code>IDAT</code> chunk, which contains the actual image data -- but nothing like that here. In similar forensics challenges where we were given only a single image file, running <code>strings</code> once revealed four <code>IDAT</code> chunks, meaning that there were actually four images hidden in one image file. Not this time.</p>
+            <p>I even did a search for <code>CTF&lcub;</code> in the output file <i>just in case</i>. Nada.</p>
+            <p>I then ran <code>binwalk</code> on it, and it thought that there was a compressed file in the PNG. Interesting.</p>
+            <img src="./bsidessf-2024/sgai/attempts/png_binwalk_output.png" alt="binwalk output for png">
+            <p>The <code>-Me</code> flag when using <code>binwalk</code> recursively searches for binary data and attempts to extract it. What the output told me was that whatever <code>binwalk</code> found and extracted basically had nothing in it, i.e. the files it scanned in <code>/_sgi_output.png.extracted/29</code>.</p>
+            <p>So, I was pretty much at a dead end with this approach.</p>
+            <p>Okay, let's go back to figuring out how to split these RGBA channels into individual files. Again came ChatGPT to the rescue; it wrote a quick script for me using OpenCV to split the PNG.</p>
+            <img src="./bsidessf-2024/sgai/solutions/screenshots/sgi_channel_split_fn.png" alt="channel split script">
+            <p>I kept running into the error "<code>Error: Unable to load the image.</code>", even though I knew I had the right pathing and everything. So this led me to think that PNG wasn't the right file format.</p>
+            <aside>
+              <h3>Aside: I could not reproduce these errors in revisiting this challenge</h3>
+              <p>So I've been retracing my steps to do this write-up, and I'm so confused and frustrated because I actually did not run into any of the same issues during the CTF competition. I was able to convert the SGI to PNG successfully the first time, and did not get any errors running the channel split script!</p>
+              <p>In fact, the script successfully generated four beautiful PNG files: red, blue, green, and alpha. Opening any of the RGB files revealed the hidden flag for the sgai-3 challenge: <strong><em>CTF{invisibility_cloak}</em></strong>. It was the alpha layer, which handles transparency in an image, that was hiding the flag in the original image. (The blue channel PNG, for example, can be viewed <a href="./bsidessf-2024/sgai/solutions/channel-splits/blue_channel.png">here</a>).</p>
+              <p>Needless to say, I'm a little annoyed this didn't work during the competition because it would've saved me so much time and I would've had a shot at solving another sgai challenge.</p>
+            </aside>
+          </details>
+          <details>
+            <summary>Attempt 2: splitting on the SGI file itself</summary>
+            <p>(If you read the spoiler in the previous section regarding the answer to the sgai-3 challenge, just ignore that for now).</p>
+            <p>Okay so my <code>sgi_channel_split.py</code> script didn't work. What if we just attempt to run it on the original <code>.sgi</code> file itself?</p>
+            <p>Again, I got the error "<code>Error: Unable to load the image.</code>". I read through the OpenCV documentation and did not see SGI explicitly listed as one of the supported file types. (And this is also where it's good to validate what ChatGPT tells you because it told me that OpenCV supports SGI files). Bummer. Moving on...</p>
+          </details>
+          <details>
+            <summary>Attempt 3 (with success): converting to a BMP</summary>
+            <p>So no results with the PNG and no results with the SGI file. What other ways could the data in the SGI file be represented?</p>
+            <p>The SGI file format is basically like a bitmap (which literally means a "map of bits" and stores a variable number of bits per pixel), although bitmaps are typically uncompressed and the SGI file that I had was compressed with RLE. Regardless, I used my <code>convert_sgi.py</code> script again to produce a BMP.</p>
+            <p>I followed-up with running the <code>sgi_channel_split.py</code> script on the BMP and, at long last, I had my channel-split PNGs! No errors, and how glorious that was. (I did find it strange that I only had PNGs for the RGB files -- where did the transparency layer go? -- but I was too excited about getting the flag to care that much. More on this little detail in the <em>Retrospectives</em> section...)</p>
+            <p>Looking at any of the RGB PNGs reveals the answer to the sgai-3 challenge: <strong><em>CTF{invisibility_cloak}</em></strong>. You can find those in my <a href="https://github.com/sobriquette/sobriquette.github.io">GitHub repo</a>.</p>
+            <p>I submitted it to the CTF server and woohoo! More points for the team.</p>
+          </details>
+          <details>
+            <summary>Retrospectives</summary>
+            <h3>Learning the right order of procedures</h3>
+            <p>I briefly mentioned in the <em>Initial Approach</em> section that instead of jumping straight to <code>binwalk</code>, I should've first run <code>strings</code>. And if <i>that</i> failed to yield anything, I should've moved on to running <code>xxd</code> before even thinking of using <code>binwalk</code>. Here's why:</p>
+            <img src="./bsidessf-2024/sgai/solutions/screenshots/strings_sgi_output.png" alt="output of strings on the SGI">
+            <p>That ^ is the output of running <code>strings</code> directly on the SGI file. I would've gotten one of the four flags in the challenge within the first minute!</p>
+            <p>If I started with <code>xxd</code> instead, I similarly would've found the first flag immediately:</p>
+            <img src="./bsidessf-2024/sgai/solutions/screenshots/xxd_sgai_output.png" alt="output of xxd on the SGI">
+            <p>The idea behind running these basic commands first before diving into the binary data is the same as if you were trying to figure out why a webpage won't load on your phone when it's on your home WiFi network. We'd probably first ask questions like,</p>
+            <ul>
+              <li>are we still connected to the (or a) network?</li>
+              <li>if so, is it the right network?</li>
+              <li>can I load the page on cellular data?</li>
+            </ul>
+            <p>...before unplugging or resetting the router, or running diagnostics tests on your phone because maybe now we're panicking that our phone's broken or whatever.</p>
+            <p>You live and you learn. After all, this is the kind of experience I wanted to get out of doing this CTF competition!</p>
+            <h3>Checking assumptions</h3>
+            <p>Another embarrassing and laughable oversight I made while doing this challenge was assuming the BMP that my script produced not only looked like the SGI and PNG files, but also that Pillow had included the RGBA layers of the original SGI.</p>
+            <p>Ya hate to see it, but when I ran the image conversion script and got the BMP, I didn't even look at it. I was so fixated on the fact that I need to remove the alpha layer that I simply went straight to running the channel-split script. While it did give me the results I wanted, I actually could've skipped the channel splitting completely! Because Pillow doesn't support reading and writing BMPs with the alpha channel, the BMP I got from my conversion script had the transparency layer stripped by default.</p>
+            <p>If I had simply looked at the resulting BMP, I would've seen the CTF flag. While it would've saved me a minute at most (the channel-split script is fast), it is a good reminder to check your assumptions at each step so you don't miss something so obvious. Even though the savings were small here, in a different challenge it could mean the difference between having the time to solve just one challenge versus two, or three, or more!</p>
+            <p>It is also a good reminder to not just blindly use whatever code ChatGPT gives me -- even though it works perfectly the first run and gives me exactly what I want -- and do a <i>little</i> bit of research into the libraries or methods being called. If I had done a quick read through Pillow's Image module documentation on file formats, I would've known that it doesn't support alpha/transparency layers for BMP.</p>
+            <p>Additionally, I noted in the section, "Attempt 3", that I was missing a PNG for one of the channels: the alpha channel. When I decided to convert the SGI to a BMP, I did first check whether there would be any data loss in the conversion, e.g. unable to handle the alpha channel. But on a hypothetical level and not specific to the Pillow library (guh). All I did was glance at a highlighted section on the Wikipedia page on BMP formats and some of the top Stack Overflow posts from a quick Google search: <i>they</i> said that <i>yes, BMP supports transparency</i>. Didn't bother to click into any of them to actually read on because the clock was ticking and the competition was ending soon.</p>
+            <p>If I did a bit of reading (wasn't even that much), I would've learned that <em>traditional</em> BMP files do not include an alpha channel and therefore do not support transparency. (While 32-bit BMP includes an additional byte for an alpha channel, that is a variation on the BMP specifications). <em>PNGs</em>, on the other hand, have built-in support for transparency. Put this information together with the Pillow documentation and it would've been <strong>so</strong> clear that the answer was already in the BMP file I had.</p>
+            <h3>Digging a little deeper when there are unexpected results</h3>
+            <p>As I mentioned in the walkthroughs of the various attempts I made to split the file into RGBA channels, I got some errors I didn't expect during the challenge but couldn't reproduce in doing this write-up. The channel-split script that you'll find in my GitHub repo is unmodified from what ChatGPT spat out for me. The only changes I made between runs were the input file paths. Maybe I <i>did</i> actually mess up the file path or had a typo or <em>something</em> and that's why the script couldn't load the PNG. There's no way for me to go back in time, but I think if I put a <i>little</i> more time into doing some debugging, I could have produced the channel-split PNGs that I wanted from the get-go, instead of immediately moving onto the next approach.</p>
+          </details>
+        </section>
+        <hr>
+        <section>
+          <h2>Takeaways</h2>
+          <ol>
+            <li>Do basic, sanity-check tests first before getting into the weeds.</li>
+            <li>Check. my. assumptions!!!</li>
+            <li>Haste makes waste -- take the extra 5-20 minutes to do some debugging or actually read docs because it saves more time down the road.</li>
+            <li>Use Google search results and ChatGPT to cross-reference information, but don't strictly depend on either and assume what's posted is true.</li>
+          </ol>
+          <p>Thanks for reading! If you want to check them out, the files and scripts I mentioned in this post are all uploaded to my <a href="https://github.com/sobriquette/sobriquette.github.io">GitHub repo</a>.</p>
         </section>
     </main>
   </body>
